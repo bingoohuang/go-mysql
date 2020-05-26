@@ -151,7 +151,7 @@ func (c *Canal) runSyncBinlog() error {
 					if node.db == "" {
 						node.db = string(e.Schema)
 					}
-					if err = c.updateTable(node.db, node.table); err != nil {
+					if err = c.updateTable(node.db, node.table, e); err != nil {
 						return errors.Trace(err)
 					}
 				}
@@ -230,10 +230,17 @@ func parseStmt(stmt ast.StmtNode) (ns []*node) {
 	return
 }
 
-func (c *Canal) updateTable(db, table string) (err error) {
+func (c *Canal) updateTable(db, table string, queryEvent *replication.QueryEvent) (err error) {
 	c.ClearTableCache([]byte(db), []byte(table))
-	log.Infof("table structure changed, clear table cache: %s.%s\n", db, table)
-	if err = c.eventHandler.OnTableChanged(db, table); err != nil && errors.Cause(err) != schema.ErrTableNotExist {
+
+	// query: /* rds internal mark */ CREATE TABLE IF NOT EXISTS mysql.ha_health_check (
+	// 		id   BIGINT  DEFAULT 0,
+	// 	type CHAR(1) DEFAULT '0',
+	// 		PRIMARY KEY (type)
+	// )
+	// log.Infof("query: %s\n", query)
+	// log.Infof("table structure changed, clear table cache: %s.%s\n", db, table)
+	if err = c.eventHandler.OnTableChanged(db, table, queryEvent); err != nil && errors.Cause(err) != schema.ErrTableNotExist {
 		return errors.Trace(err)
 	}
 	return

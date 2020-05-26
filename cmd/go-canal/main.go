@@ -23,10 +23,10 @@ var flavor = flag.String("flavor", "mysql", "Flavor: mysql or mariadb")
 var serverID = flag.Int("server-id", 101, "Unique Server ID")
 var mysqldump = flag.String("mysqldump", "mysqldump", "mysqldump execution path")
 
-var dbs = flag.String("dbs", "test", "dump databases, seperated by comma")
-var tables = flag.String("tables", "", "dump tables, seperated by comma, will overwrite dbs")
-var tableDB = flag.String("table_db", "test", "database for dump tables")
-var ignoreTables = flag.String("ignore_tables", "", "ignore tables, must be database.table format, separated by comma")
+var dbs = flag.String("dbs", "test", "dump Databases, separated by comma")
+var tables = flag.String("Tables", "", "dump Tables, separated by comma, will overwrite dbs")
+var tableDB = flag.String("table_db", "test", "database for dump Tables")
+var ignoreTables = flag.String("ignore_tables", "", "ignore Tables, must be database.table format, separated by comma")
 
 var startName = flag.String("bin_name", "", "start sync from binlog name")
 var startPos = flag.Uint("bin_pos", 0, "start sync from binlog position of")
@@ -73,7 +73,10 @@ func main() {
 		c.AddDumpDatabases(subs...)
 	}
 
-	c.SetEventHandler(&handler{})
+	eventHandler := makeHandler()
+	fmt.Printf("use eventHandler %+v\n", *eventHandler)
+
+	c.SetEventHandler(eventHandler)
 
 	startPos := mysql.Position{
 		Name: *startName,
@@ -101,16 +104,71 @@ func main() {
 	c.Close()
 }
 
-type handler struct {
+type Handler struct {
+	Databases map[string]bool
+
+	// dump Tables, separated by comma, will overwrite dbs
+	Tables       map[string]bool
+	TableDB      string
+	IgnoreTables map[string]bool
+
 	canal.DummyEventHandler
 }
 
-func (h *handler) OnRow(e *canal.RowsEvent) error {
-	fmt.Printf("%v\n", e)
+func makeHandler() *Handler {
+	h := &Handler{}
+	h.Databases = make(map[string]bool)
+	h.Tables = make(map[string]bool)
+	h.IgnoreTables = make(map[string]bool)
+
+	if *ignoreTables != "" {
+		for _, sub := range strings.Split(*ignoreTables, ",") {
+			if seps := strings.Split(sub, "."); len(seps) == 2 {
+				h.IgnoreTables[strings.ToUpper(sub)] = true
+			}
+		}
+	}
+
+	if *tables != "" && *tableDB != "" {
+		h.TableDB = *tableDB
+		for _, sub := range strings.Split(*tables, ",") {
+			h.Tables[strings.ToUpper(sub)] = true
+		}
+	} else if *dbs != "" {
+		for _, sub := range strings.Split(*dbs, ",") {
+			h.Databases[strings.ToUpper(sub)] = true
+		}
+	}
+
+	return h
+}
+
+func (h *Handler) OnRow(e *canal.RowsEvent) error {
+	if len(h.IgnoreTables) > 0 {
+		if _, ok := h.Databases[strings.ToUpper(e.Table.String())]; !ok {
+			return nil
+		}
+	}
+
+	if h.TableDB != "" {
+		if strings.ToUpper(e.Table.Schema) != h.TableDB {
+			return nil
+		}
+
+		if _, ok := h.Tables[strings.ToUpper(e.Table.Name)]; !ok {
+			return nil
+		}
+	} else if len(h.Databases) > 0 {
+		if _, ok := h.Databases[strings.ToUpper(e.Table.Schema)]; !ok {
+			return nil
+		}
+	}
+
+	fmt.Printf("RowsEvent: %v\n", e)
 
 	return nil
 }
 
-func (h *handler) String() string {
+func (h *Handler) String() string {
 	return "TestHandler"
 }

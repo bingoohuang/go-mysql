@@ -11,7 +11,7 @@ import (
 	"unicode"
 
 	"github.com/pingcap/errors"
-	"github.com/satori/go.uuid"
+	uuid "github.com/satori/go.uuid"
 	. "github.com/siddontang/go-mysql/mysql"
 )
 
@@ -601,8 +601,8 @@ func (e *MariadbGTIDEvent) Decode(data []byte) error {
 	pos += 8
 	e.GTID.DomainID = binary.LittleEndian.Uint32(data[pos:])
 	pos += 4
-	e.Flags = uint8(data[pos])
-	pos += 1
+	e.Flags = data[pos]
+	pos++
 
 	if (e.Flags & BINLOG_MARIADB_FL_GROUP_COMMIT_ID) > 0 {
 		e.CommitID = binary.LittleEndian.Uint64(data[pos:])

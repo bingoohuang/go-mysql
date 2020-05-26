@@ -34,15 +34,15 @@ type valueExpr struct {
 	ast.TexprNode
 }
 
-func newValueExpr(_ interface{}) ast.ValueExpr                      { return &valueExpr{} }
-func (ve *valueExpr) SetValue(val interface{})                      {}
-func (ve *valueExpr) GetValue() interface{}                         { return nil }
-func (ve *valueExpr) GetDatumString() string                        { return "" }
-func (ve *valueExpr) GetString() string                             { return "" }
-func (ve *valueExpr) GetProjectionOffset() int                      { return 0 }
-func (ve *valueExpr) SetProjectionOffset(offset int)                {}
-func (ve *valueExpr) Restore(ctx *format.RestoreCtx) error          { return nil }
-func (ve *valueExpr) Accept(v ast.Visitor) (node ast.Node, ok bool) { return }
-func (ve *valueExpr) Text() string                                  { return "" }
-func (ve *valueExpr) SetText(text string)                           {}
-func (ve *valueExpr) Format(w io.Writer)                            {}
+func newValueExpr(value interface{}, charset, collate string) ast.ValueExpr { return &valueExpr{} }
+func (ve *valueExpr) SetValue(val interface{})                              {}
+func (ve *valueExpr) GetValue() interface{}                                 { return nil }
+func (ve *valueExpr) GetDatumString() string                                { return "" }
+func (ve *valueExpr) GetString() string                                     { return "" }
+func (ve *valueExpr) GetProjectionOffset() int                              { return 0 }
+func (ve *valueExpr) SetProjectionOffset(offset int)                        {}
+func (ve *valueExpr) Restore(ctx *format.RestoreCtx) error                  { return nil }
+func (ve *valueExpr) Accept(v ast.Visitor) (node ast.Node, ok bool)         { return }
+func (ve *valueExpr) Text() string                                          { return "" }
+func (ve *valueExpr) SetText(text string)                                   {}
+func (ve *valueExpr) Format(w io.Writer)                                    {}
