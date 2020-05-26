@@ -11,7 +11,7 @@ sec:
 	@echo "[OK] Go security check was completed!"
 
 proxy:
-	export GOPROXY=https://goproxy.cn
+	#export GOPROXY=https://goproxy.cn
 
 
 default: proxy
@@ -30,7 +30,7 @@ linux:
 	upx ~/go/bin/linux_amd64/go-canal
 	upx ~/go/bin/linux_amd64/go-binlogparser
 	upx ~/go/bin/linux_amd64/go-mysqlbinlog
-	upx ~/go/bin/linux_amd64/go-mysqldump
+	upx ~/go/bin/linux_amd64/go-mysqldumpwrap
 
 # https://hub.docker.com/_/golang
 # docker run --rm -v "$PWD":/usr/src/myapp -v "$HOME/dockergo":/go -w /usr/src/myapp golang make docker
