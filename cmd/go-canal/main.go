@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/siddontang/go-mysql/replication"
 	"os"
 	"os/signal"
 	"strings"
@@ -141,6 +142,11 @@ func makeHandler() *Handler {
 	}
 
 	return h
+}
+
+func (h *Handler) OnRotate(e *replication.RotateEvent) error {
+	fmt.Printf("RotateEvent %s:%d\n", e.NextLogName, e.Position)
+	return nil
 }
 
 func (h *Handler) OnRow(e *canal.RowsEvent) error {
