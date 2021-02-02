@@ -1,4 +1,4 @@
-module github.com/siddontang/go-mysql
+module github.com/bingoohuang/go-mysql
 
 go 1.14
 
@@ -26,9 +26,4 @@ require (
 	gopkg.in/check.v1 v1.0.0-20200227125254-8fa46927fb4f // indirect
 	gopkg.in/yaml.v2 v2.3.0 // indirect
 	honnef.co/go/tools v0.0.1-2020.1.4 // indirect
-)
-
-replace (
-	github.com/coreos/bbolt => go.etcd.io/bbolt v1.3.4
-	go.etcd.io/bbolt => github.com/coreos/bbolt v1.3.4
 )

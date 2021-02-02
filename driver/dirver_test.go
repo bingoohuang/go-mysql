@@ -15,7 +15,7 @@ var testHost = flag.String("host", "127.0.0.1", "MySQL master host")
 // possible choices for different MySQL versions are: 5561,5641,3306,5722,8003,8012
 var testPort = flag.Int("port", 3306, "MySQL server port")
 var testUser = flag.String("user", "root", "MySQL user")
-var testPassword = flag.String("pass", "", "MySQL password")
+var testPassword = flag.String("pass", "root", "MySQL password")
 var testDB = flag.String("db", "test", "MySQL test database")
 
 func TestDriver(t *testing.T) {

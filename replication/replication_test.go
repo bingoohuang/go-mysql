@@ -10,10 +10,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/bingoohuang/go-mysql/client"
+	"github.com/bingoohuang/go-mysql/mysql"
 	. "github.com/pingcap/check"
 	uuid "github.com/satori/go.uuid"
-	"github.com/siddontang/go-mysql/client"
-	"github.com/siddontang/go-mysql/mysql"
 )
 
 // Use docker mysql to test, mysql is 3306, mariadb is 3316
@@ -158,8 +158,8 @@ func (t *testSyncerSuite) testSync(c *C, s *BinlogStreamer) {
 	t.testExecute(c, "DROP TABLE IF EXISTS test_json_v2")
 
 	str = `CREATE TABLE test_json_v2 (
-			id INT, 
-			c JSON, 
+			id INT,
+			c JSON,
 			PRIMARY KEY (id)
 			) ENGINE=InnoDB`
 
@@ -236,20 +236,20 @@ func (t *testSyncerSuite) testSync(c *C, s *BinlogStreamer) {
 	// Must allow zero time.
 	t.testExecute(c, `SET sql_mode=''`)
 	str = `CREATE TABLE test_parse_time (
-			a1 DATETIME, 
-			a2 DATETIME(3), 
-			a3 DATETIME(6), 
-			b1 TIMESTAMP, 
-			b2 TIMESTAMP(3) , 
+			a1 DATETIME,
+			a2 DATETIME(3),
+			a3 DATETIME(6),
+			b1 TIMESTAMP,
+			b2 TIMESTAMP(3) ,
 			b3 TIMESTAMP(6))`
 	t.testExecute(c, str)
 
 	t.testExecute(c, `INSERT INTO test_parse_time VALUES
-		("2014-09-08 17:51:04.123456", "2014-09-08 17:51:04.123456", "2014-09-08 17:51:04.123456", 
+		("2014-09-08 17:51:04.123456", "2014-09-08 17:51:04.123456", "2014-09-08 17:51:04.123456",
 		"2014-09-08 17:51:04.123456","2014-09-08 17:51:04.123456","2014-09-08 17:51:04.123456"),
 		("0000-00-00 00:00:00.000000", "0000-00-00 00:00:00.000000", "0000-00-00 00:00:00.000000",
 		"0000-00-00 00:00:00.000000", "0000-00-00 00:00:00.000000", "0000-00-00 00:00:00.000000"),
-		("2014-09-08 17:51:04.000456", "2014-09-08 17:51:04.000456", "2014-09-08 17:51:04.000456", 
+		("2014-09-08 17:51:04.000456", "2014-09-08 17:51:04.000456", "2014-09-08 17:51:04.000456",
 		"2014-09-08 17:51:04.000456","2014-09-08 17:51:04.000456","2014-09-08 17:51:04.000456")`)
 
 	t.wg.Wait()
@@ -269,7 +269,7 @@ func (t *testSyncerSuite) setupTest(c *C, flavor string) {
 		t.c.Close()
 	}
 
-	t.c, err = client.Connect(fmt.Sprintf("%s:%d", *testHost, port), "root", "", "")
+	t.c, err = client.Connect(fmt.Sprintf("%s:%d", *testHost, port), "root", "root", "")
 	if err != nil {
 		c.Skip(err.Error())
 	}
@@ -290,7 +290,7 @@ func (t *testSyncerSuite) setupTest(c *C, flavor string) {
 		Host:       *testHost,
 		Port:       port,
 		User:       "root",
-		Password:   "",
+		Password:   "root",
 		UseDecimal: true,
 	}
 

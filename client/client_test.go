@@ -6,11 +6,11 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/bingoohuang/go-mysql/test_util/test_keys"
 	. "github.com/pingcap/check"
 	"github.com/pingcap/errors"
-	"github.com/siddontang/go-mysql/test_util/test_keys"
 
-	"github.com/siddontang/go-mysql/mysql"
+	"github.com/bingoohuang/go-mysql/mysql"
 )
 
 var testHost = flag.String("host", "127.0.0.1", "MySQL server host")
@@ -22,7 +22,7 @@ var testHost = flag.String("host", "127.0.0.1", "MySQL server host")
 // Hint: use docker-compose to start corresponding MySQL docker containers and add the their ports here
 var testPort = flag.String("port", "3306", "MySQL server port") // choose one or more form 5561,5641,3306,5722,8003,8012,8013, e.g. '3306,5722,8003'
 var testUser = flag.String("user", "root", "MySQL user")
-var testPassword = flag.String("pass", "", "MySQL password")
+var testPassword = flag.String("pass", "root", "MySQL password")
 var testDB = flag.String("db", "test", "MySQL test database")
 
 func Test(t *testing.T) {

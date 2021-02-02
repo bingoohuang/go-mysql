@@ -5,13 +5,13 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/bingoohuang/go-mysql/mysql"
+	"github.com/bingoohuang/go-mysql/replication"
+	"github.com/bingoohuang/go-mysql/schema"
 	"github.com/pingcap/errors"
 	"github.com/pingcap/parser/ast"
 	uuid "github.com/satori/go.uuid"
 	"github.com/siddontang/go-log/log"
-	"github.com/siddontang/go-mysql/mysql"
-	"github.com/siddontang/go-mysql/replication"
-	"github.com/siddontang/go-mysql/schema"
 )
 
 func (c *Canal) startSyncer() (*replication.BinlogStreamer, error) {
@@ -159,7 +159,7 @@ func (c *Canal) runSyncBinlog() error {
 					savePos = true
 					force = true
 					// Now we only handle Table Changed DDL, maybe we will support more later.
-					if err = c.eventHandler.OnDDL(pos, e); err != nil {
+					if err = c.eventHandler.OnDDL(ev.Header, pos, e); err != nil {
 						return errors.Trace(err)
 					}
 				}
@@ -181,8 +181,6 @@ func (c *Canal) runSyncBinlog() error {
 			}
 		}
 	}
-
-	return nil
 }
 
 type node struct {

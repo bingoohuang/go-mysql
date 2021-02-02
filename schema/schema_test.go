@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/bingoohuang/go-mysql/client"
+	_ "github.com/bingoohuang/go-mysql/driver"
 	. "github.com/pingcap/check"
-	"github.com/siddontang/go-mysql/client"
-	_ "github.com/siddontang/go-mysql/driver"
 )
 
 // use docker mysql for test
@@ -27,10 +27,10 @@ var _ = Suite(&schemaTestSuite{})
 
 func (s *schemaTestSuite) SetUpSuite(c *C) {
 	var err error
-	s.conn, err = client.Connect(fmt.Sprintf("%s:%d", *host, 3306), "root", "", "test")
+	s.conn, err = client.Connect(fmt.Sprintf("%s:%d", *host, 3306), "root", "root", "test")
 	c.Assert(err, IsNil)
 
-	s.sqlDB, err = sql.Open("mysql", fmt.Sprintf("root:@%s:3306", *host))
+	s.sqlDB, err = sql.Open("mysql", fmt.Sprintf("root:root@%s:3306", *host))
 	c.Assert(err, IsNil)
 }
 

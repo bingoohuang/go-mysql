@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/bingoohuang/go-mysql/client"
+	"github.com/bingoohuang/go-mysql/mysql"
 	. "github.com/pingcap/check"
-	"github.com/siddontang/go-mysql/client"
-	"github.com/siddontang/go-mysql/mysql"
 )
 
 // use docker mysql for test
@@ -33,10 +33,10 @@ var _ = Suite(&schemaTestSuite{})
 
 func (s *schemaTestSuite) SetUpSuite(c *C) {
 	var err error
-	s.conn, err = client.Connect(fmt.Sprintf("%s:%d", *host, *port), "root", "", "")
+	s.conn, err = client.Connect(fmt.Sprintf("%s:%d", *host, *port), "root", "root", "")
 	c.Assert(err, IsNil)
 
-	s.d, err = NewDumper(*execution, fmt.Sprintf("%s:%d", *host, *port), "root", "")
+	s.d, err = NewDumper(*execution, fmt.Sprintf("%s:%d", *host, *port), "root", "root")
 	c.Assert(err, IsNil)
 	c.Assert(s.d, NotNil)
 

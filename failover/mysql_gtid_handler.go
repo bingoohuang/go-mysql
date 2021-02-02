@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net"
 
+	. "github.com/bingoohuang/go-mysql/mysql"
 	"github.com/pingcap/errors"
-	. "github.com/siddontang/go-mysql/mysql"
 )
 
 type MysqlGTIDHandler struct {
@@ -62,9 +62,9 @@ func (h *MysqlGTIDHandler) FindBestSlaves(slaves []*Server) ([]*Server, error) {
 	return bestSlaves, nil
 }
 
-const changeMasterToWithAuto = `CHANGE MASTER TO 
-    MASTER_HOST = "%s", MASTER_PORT = %s, 
-    MASTER_USER = "%s", MASTER_PASSWORD = "%s", 
+const changeMasterToWithAuto = `CHANGE MASTER TO
+    MASTER_HOST = "%s", MASTER_PORT = %s,
+    MASTER_USER = "%s", MASTER_PASSWORD = "%s",
     MASTER_AUTO_POSITION = 1`
 
 func (h *MysqlGTIDHandler) ChangeMasterTo(s *Server, m *Server) error {

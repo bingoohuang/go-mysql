@@ -33,7 +33,7 @@ func (s *failoverTestSuite) SetUpSuite(c *C) {
 	s.s = make([]*Server, len(ports))
 
 	for i := 0; i < len(ports); i++ {
-		s.s[i] = NewServer(fmt.Sprintf("%s:%d", *host, ports[i]), User{"root", ""}, User{"root", ""})
+		s.s[i] = NewServer(fmt.Sprintf("%s:%d", *host, ports[i]), User{"root", "root"}, User{"root", "root"})
 	}
 
 	var err error

@@ -3,21 +3,21 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/siddontang/go-mysql/replication"
+	"github.com/bingoohuang/go-mysql/replication"
 	"os"
 	"os/signal"
 	"strings"
 	"syscall"
 	"time"
 
-	"github.com/siddontang/go-mysql/canal"
-	"github.com/siddontang/go-mysql/mysql"
+	"github.com/bingoohuang/go-mysql/canal"
+	"github.com/bingoohuang/go-mysql/mysql"
 )
 
 var host = flag.String("host", "127.0.0.1", "MySQL host")
 var port = flag.Int("port", 3306, "MySQL port")
 var user = flag.String("user", "root", "MySQL user, must have replication privilege")
-var password = flag.String("password", "", "MySQL password")
+var password = flag.String("password", "root", "MySQL password")
 
 var flavor = flag.String("flavor", "mysql", "Flavor: mysql or mariadb")
 

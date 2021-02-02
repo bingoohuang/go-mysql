@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/BurntSushi/toml"
+	"github.com/bingoohuang/go-mysql/mysql"
 	"github.com/pingcap/errors"
-	"github.com/siddontang/go-mysql/mysql"
 )
 
 type DumpConfig struct {
@@ -106,7 +106,7 @@ func NewDefaultConfig() *Config {
 
 	c.Addr = "127.0.0.1:3306"
 	c.User = "root"
-	c.Password = ""
+	c.Password = "root"
 
 	c.Charset = mysql.DEFAULT_CHARSET
 	c.ServerID = uint32(rand.New(rand.NewSource(time.Now().Unix())).Intn(1000)) + 1001

@@ -1,8 +1,8 @@
 package canal
 
 import (
-	"github.com/siddontang/go-mysql/mysql"
-	"github.com/siddontang/go-mysql/replication"
+	"github.com/bingoohuang/go-mysql/mysql"
+	"github.com/bingoohuang/go-mysql/replication"
 )
 
 type EventHandler interface {
@@ -11,7 +11,7 @@ type EventHandler interface {
 	// You need to clear the associated data like cache with the table.
 	// It will be called before OnDDL.
 	OnTableChanged(schema string, table string, queryEvent *replication.QueryEvent) error
-	OnDDL(nextPos mysql.Position, queryEvent *replication.QueryEvent) error
+	OnDDL(header *replication.EventHeader, nextPos mysql.Position, queryEvent *replication.QueryEvent) error
 	OnRow(e *RowsEvent) error
 	OnXID(nextPos mysql.Position) error
 	OnGTID(gtid mysql.GTIDSet) error
@@ -27,7 +27,7 @@ func (h *DummyEventHandler) OnRotate(*replication.RotateEvent) error { return ni
 func (h *DummyEventHandler) OnTableChanged(schema string, table string, queryEvent *replication.QueryEvent) error {
 	return nil
 }
-func (h *DummyEventHandler) OnDDL(nextPos mysql.Position, queryEvent *replication.QueryEvent) error {
+func (h *DummyEventHandler) OnDDL(header *replication.EventHeader, nextPos mysql.Position, queryEvent *replication.QueryEvent) error {
 	return nil
 }
 func (h *DummyEventHandler) OnRow(*RowsEvent) error                                { return nil }
