@@ -11,7 +11,7 @@ import (
 	. "github.com/pingcap/check"
 	"github.com/pingcap/errors"
 	"github.com/pingcap/parser"
-	"github.com/siddontang/go-log/log"
+	"log"
 )
 
 var testHost = flag.String("host", "127.0.0.1", "MySQL host")
@@ -98,7 +98,7 @@ type testEventHandler struct {
 }
 
 func (h *testEventHandler) OnRow(e *RowsEvent) error {
-	log.Infof("OnRow %s %v\n", e.Action, e.Rows)
+	log.Printf("I! OnRow %s %v\n", e.Action, e.Rows)
 	umi, ok := e.Rows[0][4].(uint32) // 4th col is umi. mysqldump gives uint64 instead of uint32
 	if ok && (umi != 0 && umi != 1 && umi != 16777215) {
 		return fmt.Errorf("invalid unsigned medium int %d", umi)

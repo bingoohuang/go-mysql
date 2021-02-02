@@ -15,7 +15,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	. "github.com/pingcap/check"
 	"github.com/pingcap/errors"
-	"github.com/siddontang/go-log/log"
 )
 
 var testAddr = flag.String("addr", "127.0.0.1:4000", "MySQL proxy server address")
@@ -56,8 +55,6 @@ func prepareServerConf() []*Server {
 }
 
 func Test(t *testing.T) {
-	log.SetLevel(log.LevelDebug)
-
 	// general tests
 	inMemProvider := NewInMemoryProvider()
 	inMemProvider.AddUser(*testUser, *testPassword)

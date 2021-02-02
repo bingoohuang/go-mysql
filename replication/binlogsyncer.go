@@ -14,7 +14,7 @@ import (
 	. "github.com/bingoohuang/go-mysql/mysql"
 	"github.com/pingcap/errors"
 	uuid "github.com/satori/go.uuid"
-	"github.com/siddontang/go-log/log"
+	"log"
 )
 
 var (
@@ -145,7 +145,7 @@ func NewBinlogSyncer(cfg BinlogSyncerConfig) *BinlogSyncer {
 	// Clear the Password to avoid outputing it in log.
 	pass := cfg.Password
 	cfg.Password = ""
-	log.Infof("create BinlogSyncer with config %v", cfg)
+	log.Printf("I! create BinlogSyncer with config %v", cfg)
 	cfg.Password = pass
 
 	b := new(BinlogSyncer)
@@ -177,7 +177,7 @@ func (b *BinlogSyncer) close() {
 		return
 	}
 
-	log.Info("syncer is closing...")
+	log.Print("W! syncer is closing...")
 
 	b.running = false
 	b.cancel()
@@ -204,7 +204,7 @@ func (b *BinlogSyncer) close() {
 		b.c.Close()
 	}
 
-	log.Info("syncer is closed")
+	log.Print("W! syncer is closed")
 }
 
 func (b *BinlogSyncer) isClosed() bool {
@@ -294,7 +294,7 @@ func (b *BinlogSyncer) registerSlave() error {
 	if b.cfg.HeartbeatPeriod > 0 {
 		_, err = b.c.Execute(fmt.Sprintf("SET @master_heartbeat_period=%d;", b.cfg.HeartbeatPeriod))
 		if err != nil {
-			log.Errorf("failed to set @master_heartbeat_period=%d, err: %v", b.cfg.HeartbeatPeriod, err)
+			log.Printf("E! failed to set @master_heartbeat_period=%d, err: %v", b.cfg.HeartbeatPeriod, err)
 			return errors.Trace(err)
 		}
 	}
@@ -320,7 +320,7 @@ func (b *BinlogSyncer) enableSemiSync() error {
 	} else {
 		s, _ := r.GetString(0, 1)
 		if s != "ON" {
-			log.Errorf("master does not support semi synchronous replication, use no semi-sync")
+			log.Printf("E! master does not support semi synchronous replication, use no semi-sync")
 			b.cfg.SemiSyncEnabled = false
 			return nil
 		}
@@ -367,7 +367,7 @@ func (b *BinlogSyncer) GetNextPosition() Position {
 
 // StartSync starts syncing from the `pos` position.
 func (b *BinlogSyncer) StartSync(pos Position) (*BinlogStreamer, error) {
-	log.Infof("begin to sync binlog from position %s", pos)
+	log.Printf("I! begin to sync binlog from position %s", pos)
 
 	b.m.Lock()
 	defer b.m.Unlock()
@@ -385,7 +385,7 @@ func (b *BinlogSyncer) StartSync(pos Position) (*BinlogStreamer, error) {
 
 // StartSyncGTID starts syncing from the `gset` GTIDSet.
 func (b *BinlogSyncer) StartSyncGTID(gset GTIDSet) (*BinlogStreamer, error) {
-	log.Infof("begin to sync binlog from GTID set %s", gset)
+	log.Printf("I! begin to sync binlog from GTID set %s", gset)
 
 	b.prevGset = gset
 
@@ -589,13 +589,13 @@ func (b *BinlogSyncer) retrySync() error {
 		if b.currGset != nil {
 			msg = fmt.Sprintf("%v (last read GTID=%v)", msg, b.currGset)
 		}
-		log.Infof(msg)
+		log.Print("I!", msg)
 
 		if err := b.prepareSyncGTID(b.prevGset); err != nil {
 			return errors.Trace(err)
 		}
 	} else {
-		log.Infof("begin to re-sync from %s", b.nextPos)
+		log.Printf("I! begin to re-sync from %s", b.nextPos)
 		if err := b.prepareSyncPos(b.nextPos); err != nil {
 			return errors.Trace(err)
 		}
@@ -664,7 +664,7 @@ func (b *BinlogSyncer) onStream(s *BinlogStreamer) {
 		}
 
 		if err != nil {
-			log.Error(err)
+			log.Print("E! ", err)
 			// we meet connection error, should re-connect again with
 			// last nextPos or nextGTID we got.
 			if len(b.nextPos.Name) == 0 && b.prevGset == nil {
@@ -674,7 +674,7 @@ func (b *BinlogSyncer) onStream(s *BinlogStreamer) {
 			}
 
 			if b.cfg.DisableRetrySync {
-				log.Warn("retry sync is disabled")
+				log.Print("W! retry sync is disabled")
 				s.closeWithError(err)
 				return
 			}
@@ -688,12 +688,12 @@ func (b *BinlogSyncer) onStream(s *BinlogStreamer) {
 					b.retryCount++
 					if err = b.retrySync(); err != nil {
 						if b.cfg.MaxReconnectAttempts > 0 && b.retryCount >= b.cfg.MaxReconnectAttempts {
-							log.Errorf("retry sync err: %v, exceeded max retries (%d)", err, b.cfg.MaxReconnectAttempts)
+							log.Printf("E! retry sync err: %v, exceeded max retries (%d)", err, b.cfg.MaxReconnectAttempts)
 							s.closeWithError(err)
 							return
 						}
 
-						log.Errorf("retry sync err: %v, wait 1s and retry again", err)
+						log.Printf("E! retry sync err: %v, wait 1s and retry again", err)
 						continue
 					}
 				}
@@ -728,10 +728,10 @@ func (b *BinlogSyncer) onStream(s *BinlogStreamer) {
 			// In the MySQL client/server protocol, EOF and OK packets serve the same purpose.
 			// Some users told me that they received EOF packet here, but I don't know why.
 			// So we only log a message and retry ReadPacket.
-			log.Info("receive EOF packet, retry ReadPacket")
+			log.Print("W! receive EOF packet, retry ReadPacket")
 			continue
 		default:
-			log.Errorf("invalid stream header %c", data[0])
+			log.Printf("E! invalid stream header %c", data[0])
 			continue
 		}
 	}
@@ -784,7 +784,7 @@ func (b *BinlogSyncer) parseEvent(s *BinlogStreamer, data []byte) error {
 	case *RotateEvent:
 		b.nextPos.Name = string(event.NextLogName)
 		b.nextPos.Pos = uint32(event.Position)
-		log.Infof("rotate to %s", b.nextPos)
+		log.Printf("I! rotate to %s", b.nextPos)
 	case *GTIDEvent:
 		if b.prevGset == nil {
 			break
@@ -851,11 +851,11 @@ func (b *BinlogSyncer) newConnection() (*client.Conn, error) {
 func (b *BinlogSyncer) killConnection(conn *client.Conn, id uint32) {
 	cmd := fmt.Sprintf("KILL %d", id)
 	if _, err := conn.Execute(cmd); err != nil {
-		log.Errorf("kill connection %d error %v", id, err)
+		log.Printf("E! kill connection %d error %v", id, err)
 		// Unknown thread id
 		if code := ErrorCode(err.Error()); code != ER_NO_SUCH_THREAD {
-			log.Error(errors.Trace(err))
+			log.Print("E!", errors.Trace(err))
 		}
 	}
-	log.Infof("kill last connection id %d", id)
+	log.Printf("I! kill last connection id %d", id)
 }

@@ -2,6 +2,7 @@ package canal
 
 import (
 	"fmt"
+	"log"
 	"sync/atomic"
 	"time"
 
@@ -11,7 +12,6 @@ import (
 	"github.com/pingcap/errors"
 	"github.com/pingcap/parser/ast"
 	uuid "github.com/satori/go.uuid"
-	"github.com/siddontang/go-log/log"
 )
 
 func (c *Canal) startSyncer() (*replication.BinlogStreamer, error) {
@@ -22,7 +22,7 @@ func (c *Canal) startSyncer() (*replication.BinlogStreamer, error) {
 		if err != nil {
 			return nil, errors.Errorf("start sync replication at binlog %v error %v", pos, err)
 		}
-		log.Infof("start sync binlog at binlog file %v", pos)
+		log.Printf("I! start sync binlog at binlog file %v", pos)
 		return s, nil
 	} else {
 		gsetClone := gset.Clone()
@@ -30,7 +30,7 @@ func (c *Canal) startSyncer() (*replication.BinlogStreamer, error) {
 		if err != nil {
 			return nil, errors.Errorf("start sync replication at GTID set %v error %v", gset, err)
 		}
-		log.Infof("start sync binlog at GTID set %v", gsetClone)
+		log.Printf("I! start sync binlog at GTID set %v", gsetClone)
 		return s, nil
 	}
 }
@@ -65,7 +65,7 @@ func (c *Canal) runSyncBinlog() error {
 			switch e := ev.Event.(type) {
 			case *replication.RotateEvent:
 				fakeRotateLogName = string(e.NextLogName)
-				log.Infof("received fake rotate event, next log name is %s", e.NextLogName)
+				log.Printf("I! received fake rotate event, next log name is %s", e.NextLogName)
 			}
 
 			continue
@@ -92,7 +92,7 @@ func (c *Canal) runSyncBinlog() error {
 		case *replication.RotateEvent:
 			pos.Name = string(e.NextLogName)
 			pos.Pos = uint32(e.Position)
-			log.Infof("rotate binlog to %s", pos)
+			log.Printf("I! rotate binlog to %s", pos)
 			savePos = true
 			force = true
 			if err = c.eventHandler.OnRotate(e); err != nil {
@@ -107,7 +107,7 @@ func (c *Canal) runSyncBinlog() error {
 				if e != ErrExcludedTable &&
 					e != schema.ErrTableNotExist &&
 					e != schema.ErrMissingTableMeta {
-					log.Errorf("handle rows event at (%s, %d) error %v", pos.Name, curPos, err)
+					log.Printf("E! handle rows event at (%s, %d) error %v", pos.Name, curPos, err)
 					return errors.Trace(err)
 				}
 			}
@@ -142,7 +142,7 @@ func (c *Canal) runSyncBinlog() error {
 		case *replication.QueryEvent:
 			stmts, _, err := c.parser.Parse(string(e.Query), "", "")
 			if err != nil {
-				log.Errorf("parse query(%s) err %v, will skip this event", e.Query, err)
+				log.Printf("E! parse query(%s) err %v, will skip this event", e.Query, err)
 				continue
 			}
 			for _, stmt := range stmts {
@@ -236,8 +236,8 @@ func (c *Canal) updateTable(db, table string, queryEvent *replication.QueryEvent
 	// 	type CHAR(1) DEFAULT '0',
 	// 		PRIMARY KEY (type)
 	// )
-	// log.Infof("query: %s\n", query)
-	// log.Infof("table structure changed, clear table cache: %s.%s\n", db, table)
+	// log.Printf("I! query: %s\n", query)
+	// log.Printf("I! table structure changed, clear table cache: %s.%s\n", db, table)
 	if err = c.eventHandler.OnTableChanged(db, table, queryEvent); err != nil && errors.Cause(err) != schema.ErrTableNotExist {
 		return errors.Trace(err)
 	}
@@ -254,10 +254,7 @@ func (c *Canal) updateReplicationDelay(ev *replication.BinlogEvent) {
 
 func (c *Canal) handleRowsEvent(e *replication.BinlogEvent, ev *replication.RowsEvent) error {
 	// Caveat: table may be altered at runtime.
-	schema := string(ev.Table.Schema)
-	table := string(ev.Table.Table)
-
-	t, err := c.GetTable(schema, table)
+	t, err := c.GetTable(string(ev.Table.Schema), string(ev.Table.Table))
 	if err != nil {
 		return err
 	}
@@ -296,13 +293,11 @@ func (c *Canal) WaitUntilPos(pos mysql.Position, timeout time.Duration) error {
 			if curPos.Compare(pos) >= 0 {
 				return nil
 			} else {
-				log.Debugf("master pos is %v, wait catching %v", curPos, pos)
+				log.Printf("D! master pos is %v, wait catching %v", curPos, pos)
 				time.Sleep(100 * time.Millisecond)
 			}
 		}
 	}
-
-	return nil
 }
 
 func (c *Canal) GetMasterPos() (mysql.Position, error) {

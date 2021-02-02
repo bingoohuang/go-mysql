@@ -14,7 +14,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	. "github.com/pingcap/check"
 	"github.com/pingcap/errors"
-	"github.com/siddontang/go-log/log"
 )
 
 var delay = 50
@@ -23,8 +22,6 @@ var delay = 50
 // NOTE the idea here is to plugin a throttled credential provider so that the first connection (cache miss) will take longer time
 //      than the second connection (cache hit). Remember to set the password for MySQL user otherwise it won't cache empty password.
 func TestCachingSha2Cache(t *testing.T) {
-	log.SetLevel(log.LevelDebug)
-
 	remoteProvider := &RemoteThrottleProvider{NewInMemoryProvider(), delay + 50}
 	remoteProvider.AddUser(*testUser, *testPassword)
 	cacheServer := NewServer("8.0.12", mysql.DEFAULT_COLLATION_ID, mysql.AUTH_CACHING_SHA2_PASSWORD, test_keys.PubPem, tlsConf)
@@ -40,8 +37,6 @@ func TestCachingSha2Cache(t *testing.T) {
 }
 
 func TestCachingSha2CacheTLS(t *testing.T) {
-	log.SetLevel(log.LevelDebug)
-
 	remoteProvider := &RemoteThrottleProvider{NewInMemoryProvider(), delay + 50}
 	remoteProvider.AddUser(*testUser, *testPassword)
 	cacheServer := NewServer("8.0.12", mysql.DEFAULT_COLLATION_ID, mysql.AUTH_CACHING_SHA2_PASSWORD, test_keys.PubPem, tlsConf)
@@ -137,7 +132,7 @@ func (s *cacheTestSuite) TestCache(c *C) {
 	t2 := time.Now()
 
 	d1 := int(t2.Sub(t1).Nanoseconds() / 1e6)
-	//log.Debugf("first connection took %d milliseconds", d1)
+	//log.Printf("D! first connection took %d milliseconds", d1)
 
 	c.Assert(d1, GreaterEqual, delay)
 
@@ -154,7 +149,7 @@ func (s *cacheTestSuite) TestCache(c *C) {
 	t4 := time.Now()
 
 	d2 := int(t4.Sub(t3).Nanoseconds() / 1e6)
-	//log.Debugf("second connection took %d milliseconds", d2)
+	//log.Printf("D! second connection took %d milliseconds", d2)
 
 	c.Assert(d2, Less, delay)
 	if s.db != nil {

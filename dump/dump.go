@@ -9,7 +9,7 @@ import (
 
 	. "github.com/bingoohuang/go-mysql/mysql"
 	"github.com/pingcap/errors"
-	"github.com/siddontang/go-log/log"
+	"log"
 )
 
 // Unlick mysqldump, Dumper is designed for parsing and syning data easily.
@@ -211,7 +211,7 @@ func (d *Dumper) Dump(w io.Writer) error {
 		w.Write([]byte(fmt.Sprintf("USE `%s`;\n", d.TableDB)))
 	}
 
-	log.Infof("exec mysqldump with %v", args)
+	log.Printf("I! exec mysqldump with %v", args)
 	cmd := exec.Command(d.ExecutionPath, args...)
 
 	cmd.Stderr = d.ErrOut

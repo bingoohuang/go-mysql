@@ -121,7 +121,7 @@ type MyEventHandler struct {
 }
 
 func (h *MyEventHandler) OnRow(e *RowsEvent) error {
-	log.Infof("%s %v\n", e.Action, e.Rows)
+	log.Printf("I! %s %v\n", e.Action, e.Rows)
 	return nil
 }
 

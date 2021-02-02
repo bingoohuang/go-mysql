@@ -3,7 +3,7 @@ package replication
 import (
 	"context"
 	"github.com/pingcap/errors"
-	"github.com/siddontang/go-log/log"
+	"log"
 	"time"
 )
 
@@ -74,7 +74,7 @@ func (s *BinlogStreamer) closeWithError(err error) {
 	if err == nil {
 		err = ErrSyncClosed
 	} else {
-		log.Errorf("close sync with err: %v", err)
+		log.Printf("E! close sync with err: %v", err)
 	}
 
 	select {

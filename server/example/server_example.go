@@ -6,7 +6,7 @@ import (
 	"github.com/bingoohuang/go-mysql/mysql"
 	"github.com/bingoohuang/go-mysql/server"
 	"github.com/bingoohuang/go-mysql/test_util/test_keys"
-	"github.com/siddontang/go-log/log"
+	"log"
 
 	"crypto/tls"
 	"time"
@@ -39,7 +39,7 @@ func main() {
 			conn, err := server.NewCustomizedConn(c, svr, remoteProvider, server.EmptyHandler{})
 
 			if err != nil {
-				log.Errorf("Connection error: %v", err)
+				log.Printf("E! Connection error: %v", err)
 				return
 			}
 
