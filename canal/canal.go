@@ -424,7 +424,9 @@ func (c *Canal) prepareSyncer() error {
 		ParseTime:               c.cfg.ParseTime,
 		SemiSyncEnabled:         c.cfg.SemiSyncEnabled,
 		MaxReconnectAttempts:    c.cfg.MaxReconnectAttempts,
+		DisableRetrySync:        c.cfg.DisableRetrySync,
 		TimestampStringLocation: c.cfg.TimestampStringLocation,
+		TLSConfig:               c.cfg.TLSConfig,
 	}
 
 	if strings.Contains(c.cfg.Addr, "/") {
@@ -453,11 +455,16 @@ func (c *Canal) prepareSyncer() error {
 func (c *Canal) Execute(cmd string, args ...interface{}) (rr *mysql.Result, err error) {
 	c.connLock.Lock()
 	defer c.connLock.Unlock()
-
+	argF := make([]func(*client.Conn), 0)
+	if c.cfg.TLSConfig != nil {
+		argF = append(argF, func(conn *client.Conn) {
+			conn.SetTLSConfig(c.cfg.TLSConfig)
+		})
+	}
 	retryNum := 3
 	for i := 0; i < retryNum; i++ {
 		if c.conn == nil {
-			c.conn, err = client.Connect(c.cfg.Addr, c.cfg.User, c.cfg.Password, "")
+			c.conn, err = client.Connect(c.cfg.Addr, c.cfg.User, c.cfg.Password, "", argF...)
 			if err != nil {
 				return nil, errors.Trace(err)
 			}
