@@ -432,7 +432,7 @@ func (s *MysqlGTIDSet) String() string {
 		sets = append(sets, set.String())
 	}
 	sort.Strings(sets)
-	
+
 	sep := ""
 	for _, set := range sets {
 		buf.WriteString(sep)

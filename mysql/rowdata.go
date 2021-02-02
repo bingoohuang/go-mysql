@@ -3,8 +3,8 @@ package mysql
 import (
 	"strconv"
 
+	"github.com/bingoohuang/go-mysql/utils"
 	"github.com/pingcap/errors"
-	"github.com/siddontang/go-mysql/utils"
 )
 
 type RowData []byte

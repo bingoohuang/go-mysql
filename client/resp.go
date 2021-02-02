@@ -9,8 +9,8 @@ import (
 	"encoding/pem"
 
 	. "github.com/bingoohuang/go-mysql/mysql"
+	"github.com/bingoohuang/go-mysql/utils"
 	"github.com/pingcap/errors"
-	"github.com/siddontang/go-mysql/utils"
 	"github.com/siddontang/go/hack"
 )
 

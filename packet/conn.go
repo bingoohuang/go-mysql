@@ -3,6 +3,7 @@ package packet
 import (
 	"bufio"
 	"bytes"
+	"github.com/bingoohuang/go-mysql/utils"
 	"io"
 	"net"
 	"sync"

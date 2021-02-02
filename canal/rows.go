@@ -53,6 +53,12 @@ func (r *RowsEvent) handleUnsigned() {
 
 	for i := 0; i < len(r.Rows); i++ {
 		for _, columnIdx := range r.Table.UnsignedColumns {
+			if columnIdx >= len(r.Rows[i]) {
+				// 这里查询表字段信息的时候，是当前的字段信息（比如id，name,age,addr)
+				// 可能存在的问题是，历史表（比如 id,name,addr)和当前表字段信息不一样,导致下面的逻辑不准确
+				// 因此在表维护新增加字段时候，最好从添加到当前表所有字段之后，而不要在中间添加
+				continue
+			}
 			switch value := r.Rows[i][columnIdx].(type) {
 			case int8:
 				r.Rows[i][columnIdx] = uint8(value)
